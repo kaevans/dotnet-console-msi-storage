@@ -23,20 +23,23 @@ namespace dotnet_console_msi_storage
         {
             if(args.Length == 0)
             {
-                Console.WriteLine("Provide switch for create, delete, or list");
+                Console.WriteLine("Provide switch for create, delete, or list for blobs. Use switch for container to create the container named demo.");
             }
             else
             {
                 switch(args[0])
                 {
+                    case "container":
+                        CreateContainerIfNotExistsAsync().GetAwaiter().GetResult();
+                        break;
                     case "create":
-                        CreateBlob().GetAwaiter().GetResult();
+                        CreateBlobAsync().GetAwaiter().GetResult();
                         break;
                     case "delete":
-                        DeleteBlobs().GetAwaiter().GetResult();
+                        DeleteAllBlobsAsync().GetAwaiter().GetResult();
                         break;
                     case "list":
-                        ListBlobs().GetAwaiter().GetResult();
+                        ListBlobsAsync().GetAwaiter().GetResult();
                         break;
                     default:
                         Console.WriteLine("Provide switch for create, delete, or list");
@@ -57,10 +60,15 @@ namespace dotnet_console_msi_storage
             var container = client.GetContainerReference("demo");
             return container;
         }
-        public static async Task ListBlobs()
+
+        public static async Task CreateContainerIfNotExistsAsync()
         {
+            var container = await GetContainerAsync();
+            await container.CreateIfNotExistsAsync();
+        }
 
-
+        public static async Task ListBlobsAsync()
+        {
 
             var container = await GetContainerAsync();
             //await container.CreateIfNotExistsAsync();
@@ -84,7 +92,8 @@ namespace dotnet_console_msi_storage
 
         }
 
-        public static async Task CreateBlob()
+
+        public static async Task CreateBlobAsync()
         {
             var container = await GetContainerAsync();
 
@@ -100,7 +109,7 @@ namespace dotnet_console_msi_storage
             }
         }
 
-        public static async Task DeleteBlobs()
+        public static async Task DeleteAllBlobsAsync()
         {
             var container = await GetContainerAsync();
             Parallel.ForEach(container.ListBlobs(), x => ((CloudBlob)x).Delete());
